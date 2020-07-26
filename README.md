@@ -2,6 +2,10 @@
 
 Static (/Scala/Simple/Stupid/...) Blog Generator
 
+## Example
+
+* [sbg-example](https://github.com/manuzhang/sbg-example) - Rebuild https://manuzhang.github.io/ with SBG 
+
 ## Inspirations
 
 * [JohnSundell/Publish](https://github.com/JohnSundell/Publish)
