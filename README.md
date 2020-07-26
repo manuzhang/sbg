@@ -6,6 +6,12 @@ Static (/Scala/Simple/Stupid/...) Blog Generator
 
 * [sbg-example](https://github.com/manuzhang/sbg-example) - Rebuild https://manuzhang.github.io/ with SBG 
 
+## Dependencies 
+
+* [lihaoyi/os-lib](https://github.com/lihaoyi/os-lib)
+* [lihaoyi/scalatags](https://github.com/lihaoyi/scalatags)
+* [vsch/flexmark-java](https://github.com/vsch/flexmark-java)
+
 ## Inspirations
 
 * [JohnSundell/Publish](https://github.com/JohnSundell/Publish)
