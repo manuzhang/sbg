@@ -1,6 +1,6 @@
-# publish-scala
+# SBG
 
-Static blog written in Scala.
+Static (/Scala/Simple/Stupid/...) Blog Generator
 
 ## Inspirations
 
