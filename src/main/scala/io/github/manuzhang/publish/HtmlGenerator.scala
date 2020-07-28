@@ -58,7 +58,8 @@ class HtmlGenerator {
       meta(charset := "utf-8"),
       meta(name := "viewport", content := "width=device-width, initial-scale=1.0"),
       meta(name := "description", content := "A layout example that shows off a blog page with a list of posts."),
-      // title("Blog – Layout Examples – Pure"),
+      tag("title")("My Blog"),
+      link(rel := "shortcut icon", href := "favicon.png"),
       link(rel := "stylesheet", href := "https://unpkg.com/purecss@2.0.3/build/pure-min.css"),
       link(rel := "stylesheet", href := "https://unpkg.com/purecss@2.0.3/build/grids-responsive-min.css"),
       link(rel := "stylesheet", href := s"$cssPath/styles.css"),
@@ -137,7 +138,12 @@ class HtmlGenerator {
   }
 
   def footer(): Tag = {
-    div()
+    div(cls := "footer pure-u-1",
+      div(cls := "pure-u-1",
+        "Generated with ", a(href := "https://github.com/manuzhang/sbg", "SBG."),
+        " Written in Scala"
+      )
+    )
   }
 
   case class Post(title: String, content: String, path: String, date: String) {

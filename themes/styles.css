@@ -142,10 +142,12 @@ a:focus {
 
 .footer {
     padding: 1em 0;
+    color: #ccc;
+    font-size: 80%;
 }
 .footer a {
     color: #ccc;
-    font-size: 80%;
+    text-decoration: underline;
 }
 .footer .pure-menu a:hover,
 .footer .pure-menu a:focus {
