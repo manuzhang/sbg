@@ -103,11 +103,15 @@ a:focus {
     color: #444;
     line-height: 1.8em;
 }
+
 .post-meta {
     color: #999;
     font-size: 90%;
     margin: 0;
     font-family: 'Lucida Console', 'Andale Mono', monospace;
+}
+.post-item {
+    list-style: none;
 }
 
 .post-category {
@@ -185,3 +189,9 @@ blockquote {
     color: #777;
     font-style: italic;
 }
+
+.home {
+    float: right;
+}
+
+

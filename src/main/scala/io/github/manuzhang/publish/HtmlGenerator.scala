@@ -16,41 +16,31 @@ import scala.jdk.CollectionConverters._
 class HtmlGenerator {
 
   def genHtml(): Unit = {
-    val index = html(
-      header(cssPath = "themes"),
+    os.write.over(os.pwd / "index.html",
+      page("themes", posts(os.pwd / "posts")))
+  }
+
+  def page(themePath: String, content: Tag): String = {
+    html(
+      header(themePath),
       body(
-        grid(
-          sidebar(),
-          posts(os.pwd / "posts"),
-          footer()
+        div(id := "layout", cls := "pure-g",
+          div(cls := "sidebar pure-u-1 pure-u-md-1-4", sidebar()),
+          div(cls := "content pure-u-1 pure-u-md-3-4",
+            content,
+            div(cls := "footer pure-u-1", footer())
+          )
         )
       )
-    )
-
-    os.write.over(os.pwd / "index.html", index.render)
+    ).render
   }
 
   def genPost(content: String, path: Path): Unit = {
     val placeholder = "placeholder"
-    val index = html(
-      header(cssPath = "../../themes"),
-      body(
-        grid(
-          sidebar(),
-          div(cls := "content pure-u-1 pure-u-md-3-4", placeholder),
-          footer()
-        )
-      )
-    )
 
-    os.write.over(path, index.render.replace(placeholder, content), createFolders = true)
-  }
-
-  def grid(tags: Tag*): Tag = {
-    div(
-      id := "layout",
-      cls := "pure-g"
-    )(frag(tags))
+    os.write.over(path,
+      page("../../themes", div(placeholder)).replace(placeholder, content),
+      createFolders = true)
   }
 
   def header(cssPath: String): Tag = {
@@ -69,20 +59,16 @@ class HtmlGenerator {
   }
 
   def sidebar(): Tag = {
-    div(id := "layout", cls := "pure-g",
-      div(cls := "sidebar pure-u-1 pure-u-md-1-4",
-        div(cls := "header",
-          h1(cls := "brand-title", "My Blog"),
-          h2(cls := "brand-tagline", "Static Blog generated in Scala"),
-          tag("nav")(cls := "nav",
-            ul(cls := "nav-list",
-              li(cls := "nav-item",
-                a(cls := "pure-button", href := "https://github.com/manuzhang", "GitHub")
-              ),
-              li(cls := "nav-item",
-                a(cls := "pure-button", href := "https://twitter.com/manuzhang", "Twitter")
-              )
-            )
+    div(cls := "header",
+      h1(cls := "brand-title", "My Blog"),
+      h2(cls := "brand-tagline", "Static Blog generated in Scala"),
+      tag("nav")(cls := "nav",
+        ul(cls := "nav-list",
+          li(cls := "nav-item",
+            a(cls := "pure-button", href := "https://github.com/manuzhang", "GitHub")
+          ),
+          li(cls := "nav-item",
+            a(cls := "pure-button", href := "https://twitter.com/manuzhang", "Twitter")
           )
         )
       )
@@ -126,23 +112,21 @@ class HtmlGenerator {
         case _ => None
       }
     }.sortBy(_.date).reverse.map { post =>
-      genPost(s"<h1>${post.title}</h1>${post.content}", os.pwd / RelPath(post.path))
-      li(cls := "pure-menu-item", p(span(cls := "post-meta", s"${post.date} >> "), post.link))
+      val title = div(h1(post.title), p(post.date, a(cls := "home", href := "../../", "Home")))
+      genPost(s"${title.render}${post.content}", os.pwd / RelPath(post.path))
+      li(
+        cls := "post-item",
+        p(span(cls := "post-meta", s"${post.date} >> "), post.link))
     }
-    div(cls := "content pure-u-1 pure-u-md-3-4",
-      ul(
-        cls := "pure-menu-list",
-        toc
-      )
+    ul(
+      toc
     )
   }
 
   def footer(): Tag = {
-    div(cls := "footer pure-u-1",
-      div(cls := "pure-u-1",
-        "Generated with ", a(href := "https://github.com/manuzhang/sbg", "SBG."),
-        " Written in Scala"
-      )
+    span(
+      "Generated with ", a(href := "https://github.com/manuzhang/sbg", "SBG."),
+      " Written in Scala"
     )
   }
 
