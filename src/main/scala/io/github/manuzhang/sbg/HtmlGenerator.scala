@@ -1,4 +1,4 @@
-package io.github.manuzhang.publish
+package io.github.manuzhang.sbg
 
 import java.util.Collection
 
