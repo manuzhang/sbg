@@ -11,13 +11,14 @@ import os.{Path, RelPath}
 import scalatags.Text.TypedTag
 import scalatags.Text.all._
 
+import scala.collection.mutable.ArrayBuffer
 import scala.jdk.CollectionConverters._
 
 class HtmlGenerator {
 
-  def genHtml(): Unit = {
+  def genHtml(input: String): Unit = {
     os.write.over(os.pwd / "index.html",
-      page("themes", posts(os.pwd / "posts")))
+      page("themes", genPosts(Path(input), "output")))
   }
 
   def page(themePath: String, content: Tag): String = {
@@ -75,8 +76,7 @@ class HtmlGenerator {
     )
   }
 
-  def posts(path: Path): Tag = {
-    val regex = "^(\\d{4})\\-(0[1-9]|1[012])\\-(0[1-9]|[12][0-9]|3[01])\\-(.*)[.]md".r
+  def genPosts(input: Path, output: String): Tag = {
     val parserOptions = new MutableDataSet()
       .set(Parser.EXTENSIONS,
         List(YamlFrontMatterExtension.create()).asJava.asInstanceOf[Collection[Extension]])
@@ -87,39 +87,56 @@ class HtmlGenerator {
       .toImmutable
     val renderer = HtmlRenderer.builder(rendererOptions).build()
 
-    val toc = os.list(path).flatMap { post =>
-      post.last match {
-        case regex(year, month, day, shortTitle) => {
-          val input = os.read(post)
-          val node = parser.parse(input)
-          val dateStr = s"$year-$month-$day"
-          val fileName = s"$dateStr-$shortTitle"
-          val output = s"output/$fileName/index.html"
-          val content = renderer.render(node)
-            .replace("<code>", "<code class='language-text'>")
+    val postList = ArrayBuffer.empty[Post]
+    val regex = "^(\\d{4})\\-(0[1-9]|1[012])\\-(0[1-9]|[12][0-9]|3[01])\\-(.*)[.]md".r
 
-          node.getChildren.asScala.headOption match {
-            case Some(f: YamlFrontMatterBlock) =>
-              f.getChildren.iterator().asScala.flatMap {
-                case child: YamlFrontMatterNode if child.getKey == "title" =>
-                  child.getValues.asScala.headOption.map(Post(_, content, output, dateStr))
-                case _ => None
+    def fillPostList(p: Path): Unit = {
+      os.list(p).foreach { file =>
+        if (file.toIO.isDirectory) {
+          fillPostList(file)
+        } else {
+          file.last match {
+            case regex(year, month, day, shortTitle) => {
+              val input = os.read(file)
+              val node = parser.parse(input)
+              val dateStr = s"$year-$month-$day"
+              val fileName = s"$dateStr-$shortTitle"
+              val outputFile = s"$output/$fileName/index.html"
+              val content = renderer.render(node)
+                .replace("<code>", "<code class='language-text'>")
+
+              var title = shortTitle
+              node.getChildren.asScala.headOption.foreach {
+                case f: YamlFrontMatterBlock =>
+                  f.getChildren.iterator().asScala.foreach {
+                    case child: YamlFrontMatterNode if child.getKey == "title" =>
+                      child.getValues.asScala.headOption.foreach { t =>
+                        title = t
+                      }
+                    case _ =>
+                  }
+                case _ =>
               }
-            case _ => None
-          }
+              postList += Post(title, content, outputFile, dateStr)
+            }
 
+            case _ =>
+              println(s"${file.last} is not a valid file name" )
+          }
         }
-        case _ => None
       }
-    }.sortBy(_.date).reverse.map { post =>
-      val title = div(h1(post.title), p(post.date, a(cls := "home", href := "../../", "Home")))
-      genPost(s"${title.render}${post.content}", os.pwd / RelPath(post.path))
-      li(
-        cls := "post-item",
-        p(span(cls := "post-meta", s"${post.date} >> "), post.link))
     }
+
+    fillPostList(input)
+
     ul(
-      toc
+      postList.sortBy(_.date).reverse.map { post =>
+        val title = div(h1(post.title), p(post.date, a(cls := "home", href := "../../", "Home")))
+        genPost(s"${title.render}${post.content}", os.pwd / RelPath(post.path))
+        li(
+          cls := "post-item",
+          p(span(cls := "post-meta", s"${post.date} >> "), post.link))
+      }.toList
     )
   }
 
