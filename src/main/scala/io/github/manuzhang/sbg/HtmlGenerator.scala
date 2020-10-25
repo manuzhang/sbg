@@ -29,12 +29,13 @@ class HtmlGenerator {
 
   def genHtml(input: String, output: String): Unit = {
     val outputPath = Path(output)
-    val postList = genPosts(Path(input))
+    val postsPath = "posts"
+    val postList = genPosts(Path(input), postsPath)
 
     postList.foreach { post =>
       val header = div(h1(post.title), p(post.date, a(cls := "home", href := "../../", "Home")))
       logger.info(s"Generating ${post.path}")
-      genPost(s"${header}${post.content}", outputPath / "posts" / RelPath(post.path))
+      genPost(s"${header}${post.content}", outputPath / postsPath / RelPath(post.path))
     }
 
     val toc = ul(
@@ -47,8 +48,11 @@ class HtmlGenerator {
 
     os.write.over(Path(output) / RelPath(rssFile), rssXml(postList), createFolders = true)
 
+    val themePath = "themes"
     os.write.over(Path(output) / "index.html",
-      page("themes", toc))
+      page(themePath, toc))
+
+    os.copy(os.pwd / themePath, outputPath / themePath, replaceExisting = true)
   }
 
   def page(themePath: String, content: Tag): String = {
@@ -109,7 +113,7 @@ class HtmlGenerator {
     )
   }
 
-  def genPosts(input: Path): List[Post] = {
+  def genPosts(input: Path, output: String): List[Post] = {
     val parserOptions = new MutableDataSet()
       .set(Parser.EXTENSIONS,
         List(YamlFrontMatterExtension.create()).asJava.asInstanceOf[Collection[Extension]])
@@ -134,7 +138,7 @@ class HtmlGenerator {
               val node = parser.parse(input)
               val dateStr = s"$year-$month-$day"
               val fileName = s"$dateStr-$shortTitle"
-              val outputFile = s"$fileName/index.html"
+              val outputFile = s"$output/$fileName/index.html"
               val content = renderer.render(node)
                 .replace("<code>", "<code class='language-text'>")
 
