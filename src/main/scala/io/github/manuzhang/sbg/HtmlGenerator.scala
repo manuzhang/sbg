@@ -2,17 +2,23 @@ package io.github.manuzhang.sbg
 
 import java.util.Collection
 
+import com.typesafe.scalalogging.Logger
 import com.vladsch.flexmark.ext.yaml.front.matter.{YamlFrontMatterBlock, YamlFrontMatterExtension, YamlFrontMatterNode}
 import com.vladsch.flexmark.html.HtmlRenderer
 import com.vladsch.flexmark.parser.Parser
 import com.vladsch.flexmark.util.data.MutableDataSet
 import com.vladsch.flexmark.util.misc.Extension
+import io.github.manuzhang.sbg.HtmlGenerator.logger
 import os.{Path, RelPath}
 import scalatags.Text.TypedTag
 import scalatags.Text.all._
 
 import scala.collection.mutable.ArrayBuffer
 import scala.jdk.CollectionConverters._
+
+object HtmlGenerator {
+  val logger = Logger(classOf[HtmlGenerator])
+}
 
 class HtmlGenerator {
 
@@ -121,7 +127,7 @@ class HtmlGenerator {
             }
 
             case _ =>
-              println(s"${file.last} is not a valid file name" )
+              logger.warn(s"${file.last} is not a valid file name" )
           }
         }
       }
@@ -132,6 +138,7 @@ class HtmlGenerator {
     ul(
       postList.sortBy(_.date).reverse.map { post =>
         val title = div(h1(post.title), p(post.date, a(cls := "home", href := "../../", "Home")))
+        logger.info(s"Generating ${post.path}")
         genPost(s"${title.render}${post.content}", os.pwd / RelPath(post.path))
         li(
           cls := "post-item",
