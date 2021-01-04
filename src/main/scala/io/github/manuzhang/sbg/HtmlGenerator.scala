@@ -37,7 +37,7 @@ class HtmlGenerator {
     postList.foreach { post =>
       val header = div(h1(post.title), p(post.date, a(cls := "home", href := "../../", "Home")))
       logger.info(s"Generating ${post.path}")
-      genPost(s"${header}${post.content}", outputPath / postsPath / RelPath(post.path))
+      genPost(s"${header}${post.content}", outputPath / RelPath(post.path))
     }
 
     val toc = ul(
