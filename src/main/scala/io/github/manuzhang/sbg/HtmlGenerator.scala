@@ -1,9 +1,11 @@
 package io.github.manuzhang.sbg
 
+import java.lang.Boolean.{TRUE => JTRUE, FALSE => JFALSE}
 import java.time.format.DateTimeFormatter
 import java.util.Collection
 
 import com.typesafe.scalalogging.Logger
+import com.vladsch.flexmark.ext.tables.TablesExtension
 import com.vladsch.flexmark.ext.yaml.front.matter.{YamlFrontMatterBlock, YamlFrontMatterExtension, YamlFrontMatterNode}
 import com.vladsch.flexmark.html.HtmlRenderer
 import com.vladsch.flexmark.parser.Parser
@@ -114,15 +116,18 @@ class HtmlGenerator {
   }
 
   def genPosts(input: Path, output: String): List[Post] = {
-    val parserOptions = new MutableDataSet()
-      .set(Parser.EXTENSIONS,
-        List(YamlFrontMatterExtension.create()).asJava.asInstanceOf[Collection[Extension]])
-      .toImmutable()
-    val parser = Parser.builder(parserOptions).build()
-    val rendererOptions = new MutableDataSet()
+    val options = new MutableDataSet()
       .set(HtmlRenderer.FENCED_CODE_NO_LANGUAGE_CLASS, "language-text")
-      .toImmutable
-    val renderer = HtmlRenderer.builder(rendererOptions).build()
+      .set(Parser.EXTENSIONS,
+        List(TablesExtension.create(), YamlFrontMatterExtension.create())
+          .asJava.asInstanceOf[Collection[Extension]])
+      .set(TablesExtension.COLUMN_SPANS, JFALSE)
+      .set(TablesExtension.APPEND_MISSING_COLUMNS, JTRUE)
+      .set(TablesExtension.DISCARD_EXTRA_COLUMNS, JTRUE)
+      .set(TablesExtension.HEADER_SEPARATOR_COLUMN_MATCH, JTRUE)
+      .toImmutable()
+    val parser = Parser.builder(options).build()
+    val renderer = HtmlRenderer.builder(options).build()
 
     val postBuffer = ArrayBuffer.empty[Post]
     val regex = "^(\\d{4})\\-(0[1-9]|1[012])\\-(0[1-9]|[12][0-9]|3[01])\\-(.*)[.]md".r
