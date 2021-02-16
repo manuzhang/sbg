@@ -125,6 +125,7 @@ class HtmlGenerator {
       .set(TablesExtension.APPEND_MISSING_COLUMNS, JTRUE)
       .set(TablesExtension.DISCARD_EXTRA_COLUMNS, JTRUE)
       .set(TablesExtension.HEADER_SEPARATOR_COLUMN_MATCH, JTRUE)
+      .set(TablesExtension.CLASS_NAME, "pure-table pure-table-striped")
       .toImmutable()
     val parser = Parser.builder(options).build()
     val renderer = HtmlRenderer.builder(options).build()
@@ -159,7 +160,10 @@ class HtmlGenerator {
                   }
                 case _ =>
               }
-              postBuffer += Post(title, content, outputFile, dateStr)
+              postBuffer += Post(
+                // compatible with jekyll url encodings
+                title.replace("&#35;", "#").replace("&#58;", ":"), 
+                content, outputFile, dateStr)
             }
 
             case _ =>
