@@ -1,15 +1,19 @@
 package io.github.manuzhang.sbg
 
-import java.lang.Boolean.{TRUE => JTRUE, FALSE => JFALSE}
+import java.lang.Boolean.{FALSE => JFALSE, TRUE => JTRUE}
 import java.time.format.DateTimeFormatter
 import java.util.Collection
-
 import com.typesafe.scalalogging.Logger
+import com.vladsch.flexmark.ast.Image
 import com.vladsch.flexmark.ext.tables.TablesExtension
 import com.vladsch.flexmark.ext.yaml.front.matter.{YamlFrontMatterBlock, YamlFrontMatterExtension, YamlFrontMatterNode}
-import com.vladsch.flexmark.html.HtmlRenderer
+import com.vladsch.flexmark.html.{AttributeProvider, HtmlRenderer, IndependentAttributeProviderFactory}
+import com.vladsch.flexmark.html.renderer.{AttributablePart, LinkResolverContext}
+import com.vladsch.flexmark.html.HtmlRenderer.HtmlRendererExtension
 import com.vladsch.flexmark.parser.Parser
-import com.vladsch.flexmark.util.data.MutableDataSet
+import com.vladsch.flexmark.util.ast.Node
+import com.vladsch.flexmark.util.data.{MutableDataHolder, MutableDataSet}
+import com.vladsch.flexmark.util.html.Attributes
 import com.vladsch.flexmark.util.misc.Extension
 import io.github.manuzhang.sbg.HtmlGenerator.logger
 import os.{Path, RelPath}
@@ -116,10 +120,29 @@ class HtmlGenerator {
   }
 
   def genPosts(input: Path, output: String): List[Post] = {
+    val imgAttrExtension = new HtmlRendererExtension {
+      override def rendererOptions(options: MutableDataHolder): Unit = {
+      }
+
+      override def extend(builder: HtmlRenderer.Builder, rendererType: String): Unit = {
+        builder.attributeProviderFactory(new IndependentAttributeProviderFactory {
+          override def apply(context: LinkResolverContext): AttributeProvider = {
+            new AttributeProvider {
+              override def setAttributes(node: Node, part: AttributablePart, attributes: Attributes): Unit = {
+                node match {
+                  case _: Image => attributes.addValue("style", "width:100%")
+                  case _ => // do nothing
+                }
+              }
+            }
+          }
+        })
+      }
+    }
     val options = new MutableDataSet()
       .set(HtmlRenderer.FENCED_CODE_NO_LANGUAGE_CLASS, "language-text")
       .set(Parser.EXTENSIONS,
-        List(TablesExtension.create(), YamlFrontMatterExtension.create())
+        List(TablesExtension.create(), YamlFrontMatterExtension.create(), imgAttrExtension)
           .asJava.asInstanceOf[Collection[Extension]])
       .set(TablesExtension.COLUMN_SPANS, JFALSE)
       .set(TablesExtension.APPEND_MISSING_COLUMNS, JTRUE)
@@ -147,7 +170,6 @@ class HtmlGenerator {
               val outputFile = s"$output/$fileName/index.html"
               val content = renderer.render(node)
                 .replace("<code>", "<code class='language-text'>")
-
               var title = shortTitle
               node.getChildren.asScala.headOption.foreach {
                 case f: YamlFrontMatterBlock =>
