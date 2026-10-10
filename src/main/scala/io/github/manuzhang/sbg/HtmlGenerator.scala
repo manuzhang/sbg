@@ -13,7 +13,7 @@ import com.vladsch.flexmark.html.HtmlRenderer.HtmlRendererExtension
 import com.vladsch.flexmark.parser.Parser
 import com.vladsch.flexmark.util.ast.Node
 import com.vladsch.flexmark.util.data.{MutableDataHolder, MutableDataSet}
-import com.vladsch.flexmark.util.html.Attributes
+import com.vladsch.flexmark.util.html.MutableAttributes
 import com.vladsch.flexmark.util.misc.Extension
 import io.github.manuzhang.sbg.HtmlGenerator.logger
 import os.{Path, RelPath}
@@ -128,7 +128,7 @@ class HtmlGenerator {
         builder.attributeProviderFactory(new IndependentAttributeProviderFactory {
           override def apply(context: LinkResolverContext): AttributeProvider = {
             new AttributeProvider {
-              override def setAttributes(node: Node, part: AttributablePart, attributes: Attributes): Unit = {
+              override def setAttributes(node: Node, part: AttributablePart, attributes: MutableAttributes): Unit = {
                 node match {
                   case _: Image => attributes.addValue("style", "width:100%")
                   case _ => // do nothing
