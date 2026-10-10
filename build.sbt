@@ -3,7 +3,7 @@ version          := "0.1.0-SNAPSHOT"
 organization     := "io.github.manuzhang"
 
 libraryDependencies ++= Seq(
-  "com.lihaoyi" %% "os-lib" % "0.7.8",
+  "com.lihaoyi" %% "os-lib" % "0.8.1",
   "com.lihaoyi" %% "scalatags" % "0.8.6",
   "com.vladsch.flexmark" % "flexmark-all" % "0.61.34",
   "org.rogach" %% "scallop" % "4.1.0",
