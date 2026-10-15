@@ -8,6 +8,6 @@ libraryDependencies ++= Seq(
   "com.vladsch.flexmark" % "flexmark-all" % "0.64.0",
   "org.rogach" %% "scallop" % "4.1.0",
   "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5",
-  "ch.qos.logback" % "logback-classic" % "1.2.11"
+  "ch.qos.logback" % "logback-classic" % "1.6.5"
 )
 
