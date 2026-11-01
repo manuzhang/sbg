@@ -1,4 +1,4 @@
-scalaVersion     := "2.13.8"
+scalaVersion     := "2.13.18"
 version          := "0.1.0-SNAPSHOT"
 organization     := "io.github.manuzhang"
 
